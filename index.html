@@ -61,6 +61,8 @@
       font-size: 22px;
       color: #d6336c;
       z-index: 2;
+      max-width: 700px;
+      text-align: center;
     }
 
     .cat {
@@ -116,7 +118,7 @@
     const yesBtn = document.getElementById("yesBtn");
     const heartsContainer = document.getElementById("hearts");
 
-    // Web Audio "meow-like" sound (no external files needed)
+    // --- SOUND EFFECTS ---
     function playMeow() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
@@ -126,7 +128,6 @@
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      // Quick pitch slide (sounds like a cute meow)
       osc.frequency.setValueAtTime(300, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.05);
       osc.frequency.exponentialRampToValueAtTime(350, ctx.currentTime + 0.25);
@@ -138,7 +139,36 @@
       osc.stop(ctx.currentTime + 0.3);
     }
 
-    // Start the No button near Yes button
+    function playCelebration() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Short "celebration sparkle" sound
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = 'triangle';
+      osc2.type = 'sine';
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.frequency.setValueAtTime(600, ctx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+
+      osc2.frequency.setValueAtTime(900, ctx.currentTime);
+      osc2.frequency.exponentialRampToValueAtTime(1600, ctx.currentTime + 0.25);
+
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+      osc1.start(); osc2.start();
+      osc1.stop(ctx.currentTime + 0.35);
+      osc2.stop(ctx.currentTime + 0.35);
+    }
+
+    // --- POSITION NO BUTTON NEAR YES ---
     const yesRect = yesBtn.getBoundingClientRect();
     noBtn.style.left = yesRect.right + 20 + "px";
     noBtn.style.top = yesRect.top + "px";
@@ -162,10 +192,10 @@
       noBtn.style.top = y + "px";
     }
 
+    // --- FLOATING HEARTS ---
     function startFloatingHearts() {
       heartsContainer.style.display = "block";
 
-      // Create hearts continuously
       const interval = setInterval(() => {
         const heart = document.createElement("div");
         heart.classList.add("heart");
@@ -174,18 +204,29 @@
         heart.style.fontSize = 20 + Math.random() * 20 + "px";
         heartsContainer.appendChild(heart);
 
-        // Remove after animation ends
         setTimeout(() => heart.remove(), 5200);
       }, 250);
 
-      // Stop after 8 seconds
       setTimeout(() => clearInterval(interval), 8000);
     }
 
+    // --- FLIRTY / LITTLE DIRTY MESSAGES (cycle each click) ---
+    const messages = [
+      "YES!!! 💞 My heart just did a backflip and picked you forever.",
+      "Ohhh, bold choice… I like someone who knows what they want 😉",
+      "Careful — you just signed up for a lot of smiles, trouble, and butterflies 😏",
+      "Mmm… you clicking Yes might be my favorite move tonight 🔥",
+      "If my heart could blush, it absolutely would right now 💓"
+    ];
+
+    let msgIndex = 0;
+
     function sayYes() {
-      document.getElementById("response").innerHTML =
-        "YES!!! 💞 My heart just did a little backflip, a cartwheel, and chose you forever!";
+      playCelebration();
       startFloatingHearts();
+
+      document.getElementById("response").innerHTML = messages[msgIndex];
+      msgIndex = (msgIndex + 1) % messages.length;
     }
   </script>
 </body>
