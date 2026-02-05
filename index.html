@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Be My Valentine?</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffd1dc; /* soft pink */
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #d6336c;
+      margin-bottom: 30px;
+      z-index: 2;
+    }
+
+    .buttons {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      z-index: 2;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px 22px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    #yesBtn {
+      background: #ff6b9a;
+      color: white;
+    }
+
+    #noBtn {
+      position: absolute;
+      background: #ffffff;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #response {
+      margin-top: 25px;
+      font-size: 22px;
+      color: #d6336c;
+      z-index: 2;
+    }
+
+    .cat {
+      font-size: 20px;
+    }
+
+    /* Floating hearts container */
+    #hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      display: none; /* hidden until Yes is clicked */
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -50px;
+      font-size: 24px;
+      animation: floatUp 5s linear forwards;
+      opacity: 0.9;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-110vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Will you be my Valentine? 💖</h1>
+
+  <div class="buttons">
+    <button id="yesBtn" onclick="sayYes()">Yes 😊</button>
+    <button id="noBtn"><span class="cat">🐱</span> No</button>
+  </div>
+
+  <p id="response"></p>
+
+  <div id="hearts"></div>
+
+  <script>
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const heartsContainer = document.getElementById("hearts");
+
+    // Web Audio "meow-like" sound (no external files needed)
+    function playMeow() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      // Quick pitch slide (sounds like a cute meow)
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.05);
+      osc.frequency.exponentialRampToValueAtTime(350, ctx.currentTime + 0.25);
+
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    }
+
+    // Start the No button near Yes button
+    const yesRect = yesBtn.getBoundingClientRect();
+    noBtn.style.left = yesRect.right + 20 + "px";
+    noBtn.style.top = yesRect.top + "px";
+
+    noBtn.addEventListener("mouseover", moveButton);
+    noBtn.addEventListener("touchstart", moveButton);
+
+    function moveButton() {
+      playMeow();
+
+      const btnWidth = noBtn.offsetWidth;
+      const btnHeight = noBtn.offsetHeight;
+
+      const maxX = window.innerWidth - btnWidth - 20;
+      const maxY = window.innerHeight - btnHeight - 20;
+
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+    }
+
+    function startFloatingHearts() {
+      heartsContainer.style.display = "block";
+
+      // Create hearts continuously
+      const interval = setInterval(() => {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.innerHTML = "💖";
+        heart.style.left = Math.random() * 100 + "%";
+        heart.style.fontSize = 20 + Math.random() * 20 + "px";
+        heartsContainer.appendChild(heart);
+
+        // Remove after animation ends
+        setTimeout(() => heart.remove(), 5200);
+      }, 250);
+
+      // Stop after 8 seconds
+      setTimeout(() => clearInterval(interval), 8000);
+    }
+
+    function sayYes() {
+      document.getElementById("response").innerHTML =
+        "YES!!! 💞 My heart just did a little backflip, a cartwheel, and chose you forever!";
+      startFloatingHearts();
+    }
+  </script>
+</body>
+</html>
