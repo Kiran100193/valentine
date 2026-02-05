@@ -139,40 +139,39 @@
       osc.stop(ctx.currentTime + 0.3);
     }
 
-    // Re-create audio every time (prevents mobile "old sound" caching)
-    // Stadium cheer (new instance every click so mobile never reuses old sound)
     function playCelebration() {
-      const cheer = new Audio("stadium-cheer.mp3");
-      cheer.currentTime = 0;
-      cheer.play().catch(err => console.log("Autoplay blocked until first tap:", err));
-    }() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-      // Short "celebration sparkle" sound
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      const gain = ctx.createGain();
+  const osc = ctx.createOscillator();
+  const noise = ctx.createBufferSource();
+  const gain = ctx.createGain();
+  const merger = ctx.createGain();
 
-      osc1.type = 'triangle';
-      osc2.type = 'sine';
+  // Create crowd-like noise burst
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  noise.buffer = buffer;
 
-      osc1.connect(gain);
-      osc2.connect(gain);
-      gain.connect(ctx.destination);
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(900, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.2);
 
-      osc1.frequency.setValueAtTime(600, ctx.currentTime);
-      osc1.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+  osc.connect(merger);
+  noise.connect(merger);
+  merger.connect(gain);
+  gain.connect(ctx.destination);
 
-      osc2.frequency.setValueAtTime(900, ctx.currentTime);
-      osc2.frequency.exponentialRampToValueAtTime(1600, ctx.currentTime + 0.25);
+  gain.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
 
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-
-      osc1.start(); osc2.start();
-      osc1.stop(ctx.currentTime + 0.35);
-      osc2.stop(ctx.currentTime + 0.35);
-    }
+  osc.start();
+  noise.start();
+  osc.stop(ctx.currentTime + 0.5);
+  noise.stop(ctx.currentTime + 0.5);
+}
 
     // --- POSITION NO BUTTON NEAR YES ---
     const yesRect = yesBtn.getBoundingClientRect();
