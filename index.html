@@ -173,6 +173,9 @@
     noBtn.style.left = yesRect.right + 20 + "px";
     noBtn.style.top = yesRect.top + "px";
 
+    // Make Yes work reliably on mobile taps as well as clicks
+    yesBtn.addEventListener("touchend", sayYes);
+
     noBtn.addEventListener("mouseover", moveButton);
     noBtn.addEventListener("touchstart", moveButton);
 
